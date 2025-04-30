@@ -109,7 +109,7 @@ const Navbar = () => {
                         <User className="h-4 w-4 mr-2" />
                         {t('nav.profile')}
                       </Link>
-                      {user.is_professional && (
+                      {user.is_admin && (
                         <Link
                           to="/admin"
                           className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
@@ -238,7 +238,7 @@ const Navbar = () => {
                       <User className="h-4 w-4 mr-2" />
                 {t('nav.profile')}
               </Link>
-              {user.is_professional && (
+              {user.is_admin && (
                 <Link
                   to="/admin"
                   className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 flex items-center" 

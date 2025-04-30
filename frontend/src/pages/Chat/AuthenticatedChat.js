@@ -12,7 +12,6 @@ import ChatHeader from '../../components/ChatHeader';
 import { motion } from 'framer-motion';
 import { UserCircle, LogOut, MessageSquare, Star, PlusCircle, Home, BookOpen, User } from 'lucide-react';
 import api from '../../utils/api';
-import useFeedbackPrompt from '../../hooks/useFeedbackPrompt';
 
 const AuthenticatedChat = () => {
   const { t } = useLanguage();
@@ -24,16 +23,15 @@ const AuthenticatedChat = () => {
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [fetchingChats, setFetchingChats] = useState(true);
+  const [showFeedback, setShowFeedback] = useState(false); // Local state for feedback modal
   const messageEndRef = useRef(null);
   const profileRef = useRef(null);
   const userInitials = user?.full_name ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase() : '?';
-  
-  // Use feedback prompt hook
-  const { showFeedback, promptForFeedback, closeFeedback } = useFeedbackPrompt({
-    showOnLogin: true,
-    delay: 3000,
-    probability: 0.8
-  });
+
+  // Show feedback modal on mount
+  useEffect(() => {
+    setShowFeedback(true);
+  }, []);
 
   // Auto-scroll to the bottom when messages change
   useEffect(() => {
@@ -46,7 +44,7 @@ const AuthenticatedChat = () => {
       setMenuOpen(false);
     }
   };
-  
+
   // Add event listener for outside clicks
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
@@ -63,7 +61,6 @@ const AuthenticatedChat = () => {
         const response = await api.get(`/api/chat/history/${user.id}`);
         if (response.data) {
           setChats(response.data);
-          // If there are chats, select the most recent one
           if (response.data.length > 0) {
             setCurrentChat(response.data[0]);
           }
@@ -80,23 +77,38 @@ const AuthenticatedChat = () => {
     }
   }, [user?.id]);
 
+  // Format timestamp as h:mm AM/PM
+  const formatTime = (date) => {
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  };
+
   const handleCreateChat = async () => {
+    const newChat = {
+      id: Date.now().toString(),
+      title: t.chat_newChat || 'New Chat',
+      created_at: new Date().toISOString(),
+      messages: [],
+    };
+
+    setChats(prev => [newChat, ...prev]);
+    setCurrentChat(newChat);
+
     try {
-      const response = await api.post('/api/chat/new');
-      const newChat = response.data;
-      setChats(prev => [newChat, ...prev]);
-      setCurrentChat(newChat);
+      const response = await api.post('/api/chat/new', { user_id: user.id });
+      if (response.data) {
+        setChats(prev =>
+          prev.map(chat =>
+            chat.id === newChat.id ? { ...response.data, messages: [] } : chat
+          )
+        );
+        setCurrentChat(response.data);
+      }
     } catch (error) {
       console.error('Error creating new chat:', error);
-      // Fallback to local creation if API fails
-      const newChat = {
-        id: Date.now().toString(),
-        title: 'New Chat',
-        created_at: new Date().toISOString(),
-        messages: [],
-      };
-      setChats(prev => [newChat, ...prev]);
-      setCurrentChat(newChat);
     }
   };
 
@@ -130,7 +142,6 @@ const AuthenticatedChat = () => {
       const response = await api.get(`/api/chat/${chatId}`);
       if (response.data) {
         setCurrentChat(response.data.chat);
-        // Add messages to current chat
         const updatedChat = {
           ...response.data.chat,
           messages: response.data.messages
@@ -139,7 +150,6 @@ const AuthenticatedChat = () => {
       }
     } catch (error) {
       console.error('Error loading chat messages:', error);
-      // Fallback to local state if API fails
       const selectedChat = chats.find(chat => chat.id === chatId);
       setCurrentChat(selectedChat);
     }
@@ -147,80 +157,90 @@ const AuthenticatedChat = () => {
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
-    
+
+    const timestamp = formatTime(new Date());
     const userMessage = {
+      id: Date.now().toString(),
       role: 'user',
       content: inputMessage,
       created_at: new Date().toISOString(),
+      timestamp: timestamp,
     };
 
-    // Optimistically update UI
-    const tempId = Date.now().toString();
-    const updatedChat = currentChat ? {
-      ...currentChat,
-      messages: [...(currentChat.messages || []), { ...userMessage, id: tempId }],
-    } : {
-      id: tempId,
-      title: inputMessage.substring(0, 30),
-      created_at: new Date().toISOString(),
-      messages: [{ ...userMessage, id: tempId }],
-    };
+    let updatedChat;
+    if (currentChat) {
+      updatedChat = {
+        ...currentChat,
+        messages: [...(currentChat.messages || []), userMessage],
+      };
+    } else {
+      updatedChat = {
+        id: Date.now().toString(),
+        title: inputMessage.substring(0, 30),
+        created_at: new Date().toISOString(),
+        messages: [userMessage],
+      };
+    }
 
     setCurrentChat(updatedChat);
     setInputMessage('');
     setLoading(true);
 
     try {
-      const response = await api.post('/api/chat/message', {
-        content: inputMessage,
-        chat_id: currentChat?.id
+      const endpoint = t.language === 'fr' ? '/predict' : '/predict-en';
+      const response = await api.post(`http://localhost:5001/predict`, {
+        text: inputMessage,
       });
 
       if (response.data) {
-        // Format the response based on your API
-        // This assumes response.data is an array with [userMessage, aiMessage]
         const aiMessage = {
-          id: response.data[1].id || Date.now().toString() + 1,
+          id: Date.now().toString() + '-response',
           role: 'assistant',
-          content: response.data[1].content,
-          created_at: response.data[1].created_at || new Date().toISOString(),
+          content: `${response.data.prediction1} (${t.confidence}: ${response.data.confidence}%)\n\n${response.data.prediction}`,
+          created_at: new Date().toISOString(),
+          timestamp: formatTime(new Date()),
         };
-        
+
         const finalChat = {
           ...updatedChat,
           messages: [...updatedChat.messages, aiMessage],
         };
-        
-        // If this was a new chat, update the chat list
-        if (!currentChat?.id) {
+
+        if (!currentChat) {
           setChats(prev => [finalChat, ...prev]);
         } else {
-          setChats(prev => prev.map(chat => 
-            chat.id === currentChat.id ? finalChat : chat
-          ));
+          setChats(prev =>
+            prev.map(chat => (chat.id === updatedChat.id ? finalChat : chat))
+          );
         }
-        
+
         setCurrentChat(finalChat);
+
+        await api.post('/api/chat/message', {
+          content: inputMessage,
+          chat_id: finalChat.id,
+          response: aiMessage.content,
+        });
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      // Fallback to simulated response if API fails
-      setTimeout(() => {
-        const aiMessage = {
-          id: Date.now().toString() + 1,
-          role: 'assistant',
-          content: "I'm sorry, I'm having trouble connecting to the server. Please try again later.",
-          created_at: new Date().toISOString(),
-        };
-        const finalChat = {
-          ...updatedChat,
-          messages: [...updatedChat.messages, aiMessage],
-        };
-        setCurrentChat(finalChat);
-        setChats(prev => prev.map(chat => 
-          chat.id === updatedChat.id ? finalChat : chat
-        ));
-      }, 1000);
+      const errorMessage = {
+        id: Date.now().toString() + '-error',
+        role: 'assistant',
+        content: t.chat_errorMessage || "I'm sorry, I'm having trouble connecting to the server. Please try again later.",
+        created_at: new Date().toISOString(),
+        timestamp: formatTime(new Date()),
+      };
+
+      const finalChat = {
+        ...updatedChat,
+        messages: [...updatedChat.messages, errorMessage],
+      };
+
+      setCurrentChat(finalChat);
+      setChats(prev =>
+        prev.map(chat => (chat.id === updatedChat.id ? finalChat : chat))
+      );
     } finally {
       setLoading(false);
     }
@@ -239,9 +259,7 @@ const AuthenticatedChat = () => {
 
   return (
     <div className="flex h-screen bg-white dark:bg-gray-900">
-      {/* Sidebar */}
       <div className="w-80 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col hidden md:flex">
-        {/* New Chat Button */}
         <div className="p-4">
           <button
             onClick={handleCreateChat}
@@ -251,8 +269,6 @@ const AuthenticatedChat = () => {
             New Chat
           </button>
         </div>
-
-        {/* Chat History */}
         {fetchingChats ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
@@ -277,8 +293,6 @@ const AuthenticatedChat = () => {
             )}
           </div>
         )}
-
-        {/* User Profile */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
             <div className="flex items-center gap-2">
@@ -300,13 +314,8 @@ const AuthenticatedChat = () => {
           </div>
         </div>
       </div>
-
-      {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
-        {/* Use the new ChatHeader component */}
-        <ChatHeader onFeedbackClick={promptForFeedback} />
-
-        {/* Messages */}
+        <ChatHeader onFeedbackClick={() => setShowFeedback(true)} />
         <div className="flex-1 overflow-y-auto p-4 bg-white dark:bg-gray-900">
           {!currentChat || currentChat.messages?.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center">
@@ -349,8 +358,6 @@ const AuthenticatedChat = () => {
           )}
           <div ref={messageEndRef} />
         </div>
-
-        {/* Input Area */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <div className="max-w-3xl mx-auto">
             <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="relative">
@@ -383,8 +390,6 @@ const AuthenticatedChat = () => {
           </div>
         </div>
       </div>
-
-      {/* Language and Dark Mode Toggles */}
       <div className="fixed bottom-4 right-4 flex flex-col gap-3 z-50">
         <div className="relative">
           <LanguageToggle />
@@ -407,13 +412,12 @@ const AuthenticatedChat = () => {
           </button>
         </div>
       </div>
-
-      {/* Feedback Modal */}
       <FeedbackModal
         isOpen={showFeedback}
-        onClose={closeFeedback}
+        onClose={() => setShowFeedback(false)}
         onSubmit={(data) => {
           console.log('Feedback submitted:', data);
+          setShowFeedback(false);
         }}
       />
     </div>
