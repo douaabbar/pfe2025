@@ -1,172 +1,88 @@
 // pages/Chat/UnauthenticatedChat.js
-import React, { useContext, useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LanguageContext } from '../../context/LanguageContext';
-import { getTranslation } from '../../utils/translations';
-import { AlertTriangle, MessageSquare, Send, Loader, RefreshCcw } from 'lucide-react';
-import axios from 'axios';
+import { useLanguage } from '../../context/LanguageContext';
+import { Home, BookOpen } from 'lucide-react';
 
 const UnauthenticatedChat = () => {
-  const { language } = useContext(LanguageContext);
-  const t = (key) => getTranslation(language, key);
+  const { t } = useLanguage();
+  const [symptoms, setSymptoms] = useState('');
+  const [city, setCity] = useState('');
 
-  const [input, setInput] = useState('');
-  const [messages, setMessages] = useState([
-    { type: 'bot', text: t('unauth.initialPrompt') },
-  ]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  
-  const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
-  
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-  
-  // Focus on input when component mounts
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  const handleSend = async () => {
-    if (!input.trim()) return;
-    const userMessage = input.trim();
-    setMessages(prev => [...prev, { type: 'user', text: userMessage }]);
-    setInput('');
-    setLoading(true);
-    setError('');
-
-    try {
-      const res = await axios.post('/predict', {
-        message: userMessage,
-        language,
-      });
-
-      if (res.data && res.data.message) {
-        // Ajout d'un léger délai pour simuler la saisie de réponse
-        setTimeout(() => {
-          setMessages(prev => [...prev, { type: 'bot', text: res.data.message }]);
-          setLoading(false);
-        }, 500);
-      } else {
-        throw new Error('Invalid response format');
-      }
-    } catch (err) {
-      console.error('Error sending message:', err);
-      setError(t('unauth.error'));
-      setLoading(false);
-    }
-  };
-
-  const handleNewChat = () => {
-    setMessages([{ type: 'bot', text: t('unauth.initialPrompt') }]);
-    setInput('');
-    setError('');
-    inputRef.current?.focus();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // No API logic for now
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 h-[calc(100vh-120px)] flex flex-col">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-grow flex flex-col">
-        <div className="flex items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700 pb-3">
-          <div className="flex items-center">
-            <MessageSquare className="h-6 w-6 text-blue-500 mr-2" />
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">{t('unauth.title')}</h1>
+    <div className="flex flex-col items-center justify-center min-h-[80vh] bg-[#f7fcfb] dark:bg-gray-900 transition-colors">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-2xl">
+        <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">
+          {t('findDoctor.title') || 'Trouvez un médecin près de chez vous'}
+        </h1>
+        <p className="text-gray-700 dark:text-gray-300 mb-6">
+          {t('findDoctor.subtitle') || 'Décrivez vos symptômes et indiquez-nous votre ville. Notre IA recommandera le médecin disponible le plus proche.'}
+        </p>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block font-semibold mb-1 text-gray-800 dark:text-gray-200" htmlFor="symptoms">
+              {t('findDoctor.symptomsLabel') || 'Décrivez vos symptômes'}
+            </label>
+            <textarea
+              id="symptoms"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              rows={4}
+              placeholder={t('findDoctor.symptomsPlaceholder') || 'Veuillez décrire vos symptômes en détail'}
+              value={symptoms}
+              onChange={(e) => setSymptoms(e.target.value)}
+            />
           </div>
-          <button 
-            onClick={handleNewChat}
-            className="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400 flex items-center text-sm"
-            disabled={loading}
-          >
-            <RefreshCcw className="h-4 w-4 mr-1" />
-            {t('unauth.startNew')}
-          </button>
-        </div>
-        
-        <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{t('unauth.subtitle')}</p>
-        <p className="text-xs text-gray-500 dark:text-gray-400 italic mb-4">{t('unauth.disclaimer')}</p>
-        
-        <div className="flex-grow overflow-y-auto mb-4 space-y-4">
-          {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[80%] p-3 rounded-lg shadow-sm ${
-                  msg.type === 'user'
-                    ? 'bg-blue-600 text-white rounded-br-none'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white rounded-bl-none'
-                }`}
-              >
-                {msg.text.split('\n').map((line, i) => (
-                  <React.Fragment key={i}>
-                    {line}
-                    {i < msg.text.split('\n').length - 1 && <br />}
-                  </React.Fragment>
-                ))}
-              </div>
-            </div>
-          ))}
-          {loading && (
-            <div className="flex justify-start">
-              <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm text-gray-800 dark:text-white rounded-bl-none">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '200ms' }}></div>
-                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '400ms' }}></div>
-                </div>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-        
-        {error && (
-          <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 p-3 rounded-md flex items-start">
-            <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium">{error}</p>
-              <button 
-                onClick={handleNewChat}
-                className="text-sm underline mt-1"
-              >
-                {t('unauth.startNew')}
-              </button>
-            </div>
+          <div className="mb-6">
+            <label className="block font-semibold mb-1 text-gray-800 dark:text-gray-200" htmlFor="city">
+              {t('findDoctor.cityLabel') || 'Votre ville'}
+            </label>
+            <input
+              id="city"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              placeholder={t('findDoctor.cityPlaceholder') || 'Entrez le nom de votre ville'}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+            />
           </div>
-        )}
-        
-        <div className="flex mt-2 relative">
-          <input
-            ref={inputRef}
-            className="flex-grow border border-gray-300 dark:border-gray-600 rounded-l-md p-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={t('unauth.inputPlaceholder')}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            disabled={loading}
-          />
           <button
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-r-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={handleSend}
-            disabled={loading || !input.trim()}
+            type="submit"
+            className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-md flex items-center justify-center text-lg transition"
           >
-            {loading ? <Loader className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+            <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M22 12H2m0 0l7-7m-7 7l7 7" />
+            </svg>
+            {t('findDoctor.submit') || 'Soumettre et obtenir une recommandation'}
           </button>
-        </div>
-        
-        <div className="mt-4 text-center">
-          <Link 
-            to="/login" 
-            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+        </form>
+        <div className="mt-8 text-center">
+          <Link
+            to="/login"
+            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-base flex items-center justify-center gap-1"
           >
-            {t('unauth.continue')} →
+            <span>&#8594;</span> {t('findDoctor.signInToSave') || 'Connectez-vous pour sauvegarder votre historique'}
           </Link>
         </div>
+      </div>
+      <div className="flex justify-center gap-8 my-6">
+        <Link
+          to="/"
+          className="flex items-center gap-2 px-5 py-2 rounded-full bg-blue-50 hover:bg-blue-100 dark:bg-gray-700 dark:hover:bg-gray-600 shadow transition font-semibold text-blue-700 dark:text-blue-200"
+        >
+          <Home className="h-5 w-5" />
+          Home
+        </Link>
+        <Link
+          to="/articles"
+          className="flex items-center gap-2 px-5 py-2 rounded-full bg-pink-50 hover:bg-pink-100 dark:bg-gray-700 dark:hover:bg-gray-600 shadow transition font-semibold text-pink-700 dark:text-pink-200"
+        >
+          <BookOpen className="h-5 w-5" />
+          Articles
+        </Link>
       </div>
     </div>
   );

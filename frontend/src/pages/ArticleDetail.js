@@ -3,9 +3,11 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { format } from 'date-fns';
 import api from '../utils/api';
+import { Home, BookOpen } from 'lucide-react';
 
 // Components
 import ArticleCard from '../components/ArticleCard';
+import ChatHeader from '../components/ChatHeader';
 
 const ArticleDetail = () => {
   const { id } = useParams();
@@ -16,6 +18,7 @@ const ArticleDetail = () => {
   const [relatedArticles, setRelatedArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showFeedback, setShowFeedback] = useState(false);
   
   // Handle external URLs
   useEffect(() => {
@@ -149,82 +152,104 @@ const ArticleDetail = () => {
   }
   
   return (
-    <div className="pt-8 pb-16">
-      {/* Article Header */}
-      <div className="mb-8">
+    <div className="flex-1 flex flex-col">
+      <ChatHeader onFeedbackClick={() => setShowFeedback(true)} />
+
+      {/* Centered navigation links for Home and Articles */}
+      <div className="flex justify-center gap-8 mt-2 mb-6">
+        <Link
+          to="/"
+          className="flex items-center gap-2 text-lg font-medium text-gray-200 hover:text-blue-400 transition"
+        >
+          <Home className="h-5 w-5" />
+          Home
+        </Link>
         <Link
           to="/articles"
-          className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 mb-4"
+          className="flex items-center gap-2 text-lg font-medium text-gray-200 hover:text-pink-400 transition"
         >
-          <svg className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          {t('app.back')}
+          <BookOpen className="h-5 w-5" />
+          Articles
         </Link>
-        
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          {getLocalizedField(article, 'title')}
-        </h1>
-        
-        <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400 mb-6">
-          <span className="mr-4">
-            <span className="font-medium">{t('articles.publishedOn')}:</span> {formatDate(article.created_at)}
-          </span>
-          
-          <span className="mr-4">
-            <span className="font-medium">{t('articles.category')}:</span> {article.category}
-          </span>
-          
-          {article.source_url && (
-            <a
-              href={article.source_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300"
-            >
-              <span className="font-medium">{t('articles.source')}</span>
-              <svg className="inline-block ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
-          )}
-        </div>
       </div>
       
-      {/* Article Image */}
-      {article.image_url && (
+      <div className="flex-1 overflow-y-auto p-4 bg-white dark:bg-gray-900">
+        {/* Article Header */}
         <div className="mb-8">
-          <img
-            src={article.image_url}
-            alt={getLocalizedField(article, 'title')}
-            className="w-full h-auto object-cover rounded-lg max-h-96"
-          />
-        </div>
-      )}
-      
-      {/* Article Content */}
-      <div className="prose prose-lg max-w-none dark:prose-invert mb-12">
-        <div dangerouslySetInnerHTML={{ __html: getLocalizedField(article, 'content') }} />
-      </div>
-      
-      {/* Related Articles */}
-      {relatedArticles.length > 0 && (
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            {t('articles.relatedArticles')}
-          </h2>
+          <Link
+            to="/articles"
+            className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 mb-4"
+          >
+            <svg className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            {t('app.back')}
+          </Link>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {relatedArticles.map((relatedArticle) => (
-              <ArticleCard
-                key={relatedArticle.id}
-                article={relatedArticle}
-                language={language}
-              />
-            ))}
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            {getLocalizedField(article, 'title')}
+          </h1>
+          
+          <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400 mb-6">
+            <span className="mr-4">
+              <span className="font-medium">{t('articles.publishedOn')}:</span> {formatDate(article.created_at)}
+            </span>
+            
+            <span className="mr-4">
+              <span className="font-medium">{t('articles.category')}:</span> {article.category}
+            </span>
+            
+            {article.source_url && (
+              <a
+                href={article.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300"
+              >
+                <span className="font-medium">{t('articles.source')}</span>
+                <svg className="inline-block ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            )}
           </div>
         </div>
-      )}
+        
+        {/* Article Image */}
+        {article.image_url && (
+          <div className="mb-8">
+            <img
+              src={article.image_url}
+              alt={getLocalizedField(article, 'title')}
+              className="w-full h-auto object-cover rounded-lg max-h-96"
+            />
+          </div>
+        )}
+        
+        {/* Article Content */}
+        <div className="prose prose-lg max-w-none dark:prose-invert mb-12">
+          <div dangerouslySetInnerHTML={{ __html: getLocalizedField(article, 'content') }} />
+        </div>
+        
+        {/* Related Articles */}
+        {relatedArticles.length > 0 && (
+          <div className="mt-16">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              {t('articles.relatedArticles')}
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {relatedArticles.map((relatedArticle) => (
+                <ArticleCard
+                  key={relatedArticle.id}
+                  article={relatedArticle}
+                  language={language}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

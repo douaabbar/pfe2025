@@ -12,7 +12,7 @@ import LanguageToggle from './components/LanguageToggle';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Chat from './pages/Chat';
+import Chat from './pages/Chat/Chat';
 import Articles from './pages/Articles';
 import ArticleDetail from './pages/ArticleDetail';
 import Profile from './pages/Profile';
