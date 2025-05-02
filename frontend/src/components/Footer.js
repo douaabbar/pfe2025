@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import logo from '../assets/images/logo.png';
 
 const Footer = () => {
   const { t } = useLanguage();
@@ -14,12 +15,12 @@ const Footer = () => {
           <div className="space-y-4">
             <Link to="/" className="flex items-center">
               <img
-                className="h-8 w-auto"
-                src="/logo.svg"
+                className="h-10 w-10"
+                src={logo}
                 alt="MedAI Logo"
               />
-              <span className="ml-2 text-xl font-semibold text-primary-600 dark:text-primary-400">
-                {t('app.name')}
+              <span className="ml-2 text-xl font-semibold text-gray-900 dark:text-white">
+                MedAI
               </span>
             </Link>
             <p className="text-sm text-gray-600 dark:text-gray-400">

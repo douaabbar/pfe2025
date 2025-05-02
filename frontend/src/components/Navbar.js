@@ -3,10 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
-import { Brain, Menu, X, User, Star, LogOut, Mail, FileText, Shield } from 'lucide-react';
+import { Menu, X, User, Star, LogOut, Mail, FileText, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 import QuickChat from './QuickChat';
 import FeedbackModal from './FeedbackModal';
+import logo from '../assets/images/logo.png';
 
 
 // Remove flag imports that might not exist
@@ -49,7 +50,7 @@ const Navbar = () => {
         <nav className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center space-x-2">
-              <Brain className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              <img src={logo} alt="MedAI Logo" className="h-10 w-10" />
               <span className="text-xl font-bold text-gray-900 dark:text-white">MedAI</span>
             </Link>
 

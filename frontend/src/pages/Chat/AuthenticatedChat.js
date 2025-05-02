@@ -12,6 +12,7 @@ import ChatHeader from '../../components/ChatHeader';
 import { motion } from 'framer-motion';
 import { UserCircle, LogOut, MessageSquare, Star, PlusCircle, Home, BookOpen, User } from 'lucide-react';
 import api from '../../utils/api';
+import logo from '../../assets/images/logo.png';
 
 const AuthenticatedChat = () => {
   const { t } = useLanguage();
@@ -260,7 +261,11 @@ const AuthenticatedChat = () => {
   return (
     <div className="flex h-screen bg-white dark:bg-gray-900">
       <div className="w-80 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col hidden md:flex">
-        <div className="p-4">
+        <div className="p-4 flex flex-col items-center">
+          <div className="mb-4 flex items-center">
+            <img src={logo} alt="MedAI Logo" className="h-10 w-10 mr-2" />
+            <span className="text-xl font-bold text-gray-900 dark:text-white">MedAI</span>
+          </div>
           <button
             onClick={handleCreateChat}
             className="w-full flex items-center justify-center gap-2 p-3 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-lg border border-gray-200 dark:border-gray-600 transition-colors"
@@ -296,12 +301,21 @@ const AuthenticatedChat = () => {
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
             <div className="flex items-center gap-2">
-              <div 
-                className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center text-blue-800 dark:text-blue-200 font-medium cursor-pointer"
-                onClick={toggleMenu}
-              >
-                {userInitials}
-              </div>
+              {user?.profile_image ? (
+                <img
+                  src={user.profile_image}
+                  alt={user.full_name}
+                  className="h-8 w-8 rounded-full object-cover cursor-pointer"
+                  onClick={toggleMenu}
+                />
+              ) : (
+                <div
+                  className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center text-blue-800 dark:text-blue-200 font-medium cursor-pointer"
+                  onClick={toggleMenu}
+                >
+                  {userInitials}
+                </div>
+              )}
               <span className="text-gray-900 dark:text-gray-200 truncate">{user?.full_name}</span>
             </div>
             <button
@@ -358,7 +372,7 @@ const AuthenticatedChat = () => {
           )}
           <div ref={messageEndRef} />
         </div>
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <div className="max-w-3xl mx-auto">
             <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="relative">
               <textarea
