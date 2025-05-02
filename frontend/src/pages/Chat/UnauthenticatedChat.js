@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
-import { Home, BookOpen } from 'lucide-react';
 
 const UnauthenticatedChat = () => {
   const { t } = useLanguage();
@@ -68,7 +67,22 @@ const UnauthenticatedChat = () => {
           </Link>
         </div>
       </div>
-      
+      <div className="flex justify-center gap-8 my-6">
+        <Link
+          to="/"
+          className="flex items-center gap-2 px-5 py-2 rounded-full bg-blue-50 hover:bg-blue-100 dark:bg-gray-700 dark:hover:bg-gray-600 shadow transition font-semibold text-blue-700 dark:text-blue-200"
+        >
+          <Home className="h-5 w-5" />
+          Home
+        </Link>
+        <Link
+          to="/articles"
+          className="flex items-center gap-2 px-5 py-2 rounded-full bg-pink-50 hover:bg-pink-100 dark:bg-gray-700 dark:hover:bg-gray-600 shadow transition font-semibold text-pink-700 dark:text-pink-200"
+        >
+          <BookOpen className="h-5 w-5" />
+          Articles
+        </Link>
+      </div>
     </div>
   );
 };

@@ -88,72 +88,119 @@ const Profile = () => {
     });
   };
   
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Reset states
+    setError('');
+    setSuccess('');
+    setLoading(true);
+    
+    try {
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('Image is too large. Maximum size is 5MB.');
+      }
+      
+      // Check file type
+      if (!file.type.match('image.*')) {
+        throw new Error('Only image files are allowed.');
+      }
+      
+      // Create a promise to handle FileReader
+      const readFileAsDataURL = (file) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = (e) => reject(new Error('Failed to read file'));
+          reader.readAsDataURL(file);
+        });
+      };
+      
+      // Read the file
+      const imageData = await readFileAsDataURL(file);
+      console.log('Image loaded successfully, size:', Math.round(imageData.length / 1024), 'KB');
+      
+      // Prepare the update payload
+      const updatedProfile = {
+        ...profileData,
+        profile_image: imageData
+      };
+      
+      // Make the API request
+      const userId = Number(user.id);
+      const token = getToken();
+      
+      console.log('Sending profile update request...');
+      const response = await axios.put(
+        `/api/profile/${userId}`,
+        updatedProfile,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      console.log('Profile update response:', response.status);
+      
+      if (response.status === 200) {
+        // Update both local state and global user state
+        setProfileData(response.data);
+        setUser(response.data);
+        setSuccess('Profile image updated successfully');
+      }
+    } catch (err) {
+      console.error('Profile image update error:', err);
+      setError(err.response?.data?.error || err.message || 'Failed to update profile image');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submission triggered! Form event:', e.type);
     setLoading(true);
     setError('');
     setSuccess('');
     
     try {
-      // Ensure user ID is the correct type (number)
       if (!user || !user.id) {
         throw new Error('User information is missing');
       }
       
-      // Convert user ID to a number to ensure correct type comparison in backend
       const userId = Number(user.id);
-      console.log('Using numeric user ID for request:', userId);
       
-      console.log('Submitting profile data:', JSON.stringify({
+      // Create the request payload
+      const payload = {
         ...profileData,
-        profile_image: profileData.profile_image ? 
-          profileData.profile_image.substring(0, 30) + '...[truncated]' : null
-      }));
+        profile_image: profileData.profile_image || null
+      };
       
-      console.log('User ID from context:', userId);
-      console.log('Token from localStorage:', localStorage.getItem('token') ? 'Token exists' : 'No token found');
-      
-      // Check if we're making the request to the correct endpoint
-      console.log('API endpoint should be:', `/api/profile/${userId}`);
-      
-      try {
-        // Use direct axios call with explicit numeric ID and proper Content-Type
-        const token = getToken();
-        const response = await axios.put(`/api/profile/${userId}`, profileData, {
+      // Make the API request
+      const token = getToken();
+      const response = await axios.put(
+        `/api/profile/${userId}`,
+        payload,
+        {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
-        });
-        
-        console.log('Profile update response:', response.status);
-        console.log('Profile update response data:', JSON.stringify({
-          ...response.data,
-          profile_image: response.data?.profile_image ? 
-            response.data.profile_image.substring(0, 30) + '...[truncated]' : null
-        }));
-        
-        setUser(response.data);
-      setSuccess('Profile updated successfully');
-      } catch (requestError) {
-        console.error('Request error details:', {
-          message: requestError.message,
-          response: requestError.response ? {
-            status: requestError.response.status,
-            statusText: requestError.response.statusText,
-            data: requestError.response.data
-          } : 'No response object',
-          request: requestError.request ? 'Request sent but no response' : 'Request setup failed',
-          stack: requestError.stack
-        });
-        throw requestError;
-      }
+        }
+      );
       
-      setLoading(false);
+      if (response.status === 200) {
+        setProfileData(response.data);
+        setUser(response.data);
+        setSuccess('Profile updated successfully');
+      }
     } catch (err) {
       console.error('Profile update error:', err);
-      setError(err.message || 'Failed to update profile');
+      setError(err.response?.data?.error || 'Failed to update profile');
+    } finally {
       setLoading(false);
     }
   };
@@ -203,44 +250,6 @@ const Profile = () => {
         setLoading(false);
       }
     }
-  };
-  
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    // Check file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image is too large. Maximum size is 5MB.');
-      return;
-    }
-    
-    // Check file type
-    if (!file.type.match('image/*')) {
-      setError('Only image files are allowed.');
-      return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      // event.target.result contains the base64 encoded image
-      const imageData = event.target.result;
-      console.log('Image loaded successfully, size:', Math.round(imageData.length / 1024), 'KB');
-      console.log('Image data starts with:', imageData.substring(0, 30) + '...');
-      
-      setProfileData({
-        ...profileData,
-        profile_image: imageData
-      });
-    };
-    
-    reader.onerror = (error) => {
-      console.error('Error reading file:', error);
-      setError('Failed to read the image file.');
-    };
-    
-    // Read the file as a data URL (base64)
-    reader.readAsDataURL(file);
   };
   
   const handleCameraCapture = () => {

@@ -1,6 +1,7 @@
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey, JSON
+from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.orm import relationship
 
 from backend.app import db
@@ -12,7 +13,7 @@ class User(db.Model):
     full_name = Column(String(100), nullable=False)
     email = Column(String(120), unique=True, nullable=False)
     password_hash = Column(String(256), nullable=False)
-    profile_image = Column(Text, nullable=True)
+    profile_image = Column(MEDIUMTEXT, nullable=True)
     is_professional = Column(Boolean, default=False)
     is_admin = Column(Boolean, default=False)
     profession = Column(String(50), nullable=True)

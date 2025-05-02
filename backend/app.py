@@ -21,18 +21,20 @@ app = Flask(__name__, static_folder=None)  # Disable default static folder
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
+# Configure max content length for file uploads (10MB)
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
+
 # Disable automatic trailing slash redirects
 app.url_map.strict_slashes = False
 
 # Use Flask-CORS extension properly
 CORS(app, 
-    resources={r"/api/*": {"origins": "http://localhost:3000"}},
+    resources={r"/api/*": {"origins": "*"}},
     supports_credentials=True,
     allow_headers=["Content-Type", "Authorization", "Accept", "X-Requested-With"],
     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     expose_headers=["Content-Type", "Authorization"],
-    max_age=3600,  # Cache preflight requests for 1 hour
-    automatic_options=True  # Handle OPTIONS automatically
+    max_age=3600  # Cache preflight requests for 1 hour
 )
 
 # Configure JWT with more secure settings
@@ -51,22 +53,22 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 }
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Disable CSRF for API endpoints during debugging
-app.config["WTF_CSRF_ENABLED"] = False  # Temporary for debugging
+# Enable debug mode
+app.debug = True
 
 # Log all requests for debugging
 @app.before_request
 def log_request():
     print(f"Request: {request.method} {request.path}")
-    print(f"  Headers: {dict(request.headers)}")
+    print(f"Headers: {dict(request.headers)}")
     if request.is_json:
-        print(f"  JSON data: {request.get_json()}")
+        print(f"JSON data size: {len(str(request.get_json()))} bytes")
     elif request.form:
         # Don't log passwords
         form_data = dict(request.form)
         if 'password' in form_data:
             form_data['password'] = '[REDACTED]'
-        print(f"  Form data: {form_data}")
+        print(f"Form data: {form_data}")
 
 # Initialize extensions with app
 db.init_app(app)

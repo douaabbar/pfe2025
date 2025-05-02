@@ -474,7 +474,11 @@ const AdminDashboard = () => {
   const handleConfirmAction = () => {
     const { type, userId, articleId, feedId } = confirmAction;
     
-    if (type === 'block' || type === 'admin' || type === 'delete') {
+    if (type === 'delete') {
+      handleUserAction(type, userId);
+    } else if (type === 'block') {
+      handleUserAction(type, userId);
+    } else if (type === 'admin') {
       handleUserAction(type, userId);
     } else if (type === 'delete-article') {
       handleArticleAction('delete', articleId);
@@ -585,6 +589,7 @@ const AdminDashboard = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{translate("Utilisateur")}</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{translate("Date")}</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{translate("Langue")}</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{translate("Actions")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -625,6 +630,30 @@ const AdminDashboard = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900 dark:text-gray-200">
                       {feedback.language || 'fr'}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right">
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        onClick={() => handleHideFeedback(feedback.id)}
+                        className="p-1 rounded-full text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-200"
+                        title="Hide review"
+                      >
+                        {/* Eye/EyeOff icon for hide */}
+                        {feedback.hidden ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.657.403-3.22 1.125-4.575M15 12a3 3 0 11-6 0 3 3 0 016 0zm6.364-2.364A9.956 9.956 0 0021 9c0 5.523-4.477 10-10 10a9.956 9.956 0 01-4.636-1.364M3 3l18 18" /></svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6.364-2.364A9.956 9.956 0 0021 9c0 5.523-4.477 10-10 10S1 14.523 1 9a9.956 9.956 0 012.636-2.364" /></svg>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteFeedback(feedback.id)}
+                        className="p-1 rounded-full text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-200"
+                        title="Delete review"
+                      >
+                        {/* Trash icon */}
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -1957,6 +1986,31 @@ const AdminDashboard = () => {
         </div>
       </div>
     );
+  };
+  
+  // Add these functions inside AdminDashboard component
+  const handleDeleteFeedback = async (feedbackId) => {
+    try {
+      setLoading(true);
+      const token = getToken();
+      const headers = { Authorization: `Bearer ${token}` };
+      await axios.delete(`/api/feedback/${feedbackId}`, { headers });
+      setFeedbacks(prev => prev.filter(fb => fb.id !== feedbackId));
+      setSuccessNotification({ show: true, message: 'Review deleted successfully!' });
+      setTimeout(() => setSuccessNotification({ show: false, message: '' }), 3000);
+    } catch (err) {
+      setError('Failed to delete review.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleHideFeedback = (feedbackId) => {
+    setFeedbacks(prev => prev.map(fb =>
+      fb.id === feedbackId ? { ...fb, hidden: !fb.hidden } : fb
+    ));
+    setSuccessNotification({ show: true, message: 'Review visibility toggled!' });
+    setTimeout(() => setSuccessNotification({ show: false, message: '' }), 2000);
   };
   
   return (
