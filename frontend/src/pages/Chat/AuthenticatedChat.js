@@ -157,7 +157,6 @@ const AuthenticatedChat = () => {
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
-
     const timestamp = formatTime(new Date());
     const userMessage = {
       id: Date.now().toString(),
