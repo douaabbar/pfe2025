@@ -17,7 +17,6 @@ import logo from '../../assets/images/logo.png';
 const AuthenticatedChat = () => {
   const { t } = useLanguage();
   const { user, logout } = useAuth();
-  const { darkMode, toggleDarkMode } = useTheme();
   const [chats, setChats] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [inputMessage, setInputMessage] = useState('');
@@ -270,7 +269,7 @@ const AuthenticatedChat = () => {
             className="w-full flex items-center justify-center gap-2 p-3 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-lg border border-gray-200 dark:border-gray-600 transition-colors"
           >
             <PlusCircle className="h-5 w-5" />
-            New Chat
+            {t('chat.newChat')}
           </button>
         </div>
         {fetchingChats ? (
@@ -282,8 +281,8 @@ const AuthenticatedChat = () => {
             {chats.length === 0 ? (
               <div className="p-4 text-center text-gray-500 dark:text-gray-400">
                 <MessageSquare className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                <p>No chat history yet.</p>
-                <p>Start a new conversation!</p>
+                <p>{t('chat.noChats')}</p>
+                <p>{t('chat.startConversation')}</p>
               </div>
             ) : (
               <ChatHistory
@@ -334,10 +333,10 @@ const AuthenticatedChat = () => {
             <div className="h-full flex flex-col items-center justify-center text-center">
               <MessageSquare className="h-16 w-16 text-gray-300 dark:text-gray-700 mb-4" />
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-2">
-                How can I help you today?
+                {t('chat.howCanIHelp')}
               </h2>
               <p className="text-gray-600 dark:text-gray-400 max-w-md">
-                Ask me anything about your health concerns, symptoms, or general medical questions.
+                {t('chat.askAnything')}
               </p>
             </div>
           ) : (
@@ -378,7 +377,7 @@ const AuthenticatedChat = () => {
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={handleInputKeyDown}
-                placeholder="Type your message here..."
+                placeholder={t('chat.placeholder')}
                 className="w-full pr-14 pl-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:bg-white dark:focus:bg-gray-600"
                 rows={1}
                 disabled={loading}
@@ -398,7 +397,7 @@ const AuthenticatedChat = () => {
               </button>
             </form>
             <p className="mt-2 text-xs text-center text-gray-500 dark:text-gray-400">
-              This is not a substitute for professional medical advice. Please consult a healthcare provider for serious concerns.
+              {t('chat.disclaimer')}
             </p>
           </div>
         </div>
@@ -408,21 +407,7 @@ const AuthenticatedChat = () => {
           <LanguageToggle />
         </div>
         <div>
-          <button
-            onClick={toggleDarkMode}
-            className="p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-shadow"
-            aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {darkMode ? (
-              <svg className="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            ) : (
-              <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-            )}
-          </button>
+          <DarkModeToggle />
         </div>
       </div>
       <FeedbackModal

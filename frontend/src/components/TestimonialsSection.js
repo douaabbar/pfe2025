@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 import api from '../utils/api';
 
 // Star rating component
@@ -25,23 +26,25 @@ const StarRating = ({ rating }) => {
 
 // Testimonial Item component
 const TestimonialItem = ({ feedback }) => {
+  const { t } = useLanguage();
+
   // Get user information
   const getUserInfo = () => {
     if (!feedback.user) {
       return { 
-        name: "Anonymous User", 
-        role: "User",
+        name: t('testimonials.anonymous'),
+        role: t('testimonials.userRole'),
         initials: "A"
       };
     }
     
     const name = feedback.user.full_name;
-    let role = "User";
+    let role = t('testimonials.userRole');
     
     if (feedback.user.is_professional) {
-      role = feedback.user.profession || "Healthcare Professional";
+      role = feedback.user.profession || t('testimonials.healthcareProfessional');
     } else {
-      role = "Patient";
+      role = t('testimonials.patient');
     }
     
     // Generate initials for avatar fallback
@@ -89,6 +92,8 @@ const TestimonialItem = ({ feedback }) => {
 
 // Modal to show all testimonials
 const TestimonialsModal = ({ isOpen, onClose }) => {
+  const { t } = useLanguage();
+
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -149,7 +154,7 @@ const TestimonialsModal = ({ isOpen, onClose }) => {
       >
         <div className="flex justify-between items-center mb-6 sticky top-0 bg-white dark:bg-gray-800 py-2">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            User Testimonials
+            {t('testimonials.modalTitle')}
           </h2>
           <button
             onClick={onClose}
@@ -189,7 +194,7 @@ const TestimonialsModal = ({ isOpen, onClose }) => {
               onClick={handleLoadMore}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
             >
-              Load More
+              {t('testimonials.loadMore')}
             </button>
           </div>
         )}
@@ -200,6 +205,7 @@ const TestimonialsModal = ({ isOpen, onClose }) => {
 
 // Main Testimonials Section component
 const TestimonialsSection = () => {
+  const { t } = useLanguage();
   const [topTestimonials, setTopTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -229,7 +235,7 @@ const TestimonialsSection = () => {
     <section className="py-16 bg-white dark:bg-gray-800">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">
-          What Our Users Say
+        {t('testimonials.sectionTitle')}
         </h2>
         
         {error && (
@@ -263,21 +269,21 @@ const TestimonialsSection = () => {
                 onClick={() => setShowAllModal(true)}
                 className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
               >
-                See More Comments
+                {t('testimonials.seeMore')}
               </button>
             </div>
           </>
         ) : (
           <div className="text-center py-12">
             <p className="text-gray-600 dark:text-gray-400">
-              No testimonials available yet. Be the first to leave your feedback!
+            {t('testimonials.noTestimonialsYet')}
             </p>
             <div className="mt-6">
               <button
                 onClick={() => setShowAllModal(true)}
                 className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
               >
-                See All Feedback
+                {t('testimonials.seeAll')}
               </button>
             </div>
           </div>

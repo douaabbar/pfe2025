@@ -26,20 +26,6 @@ const Contact = () => {
               <h3 className="font-medium text-gray-900 dark:text-white">{t('legal.contact.email')}</h3>
             </div>
           </div>
-          
-          <div className="flex items-start space-x-3">
-            <MapPin className="h-6 w-6 text-primary-600 dark:text-primary-400 mt-0.5" />
-            <div>
-              <h3 className="font-medium text-gray-900 dark:text-white">{t('legal.contact.address')}</h3>
-            </div>
-          </div>
-          
-          <div className="flex items-start space-x-3">
-            <Clock className="h-6 w-6 text-primary-600 dark:text-primary-400 mt-0.5" />
-            <div>
-              <h3 className="font-medium text-gray-900 dark:text-white">{t('legal.contact.hours')}</h3>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -79,7 +79,7 @@ const translations = {
     'home.featureProfileDesc': 'Create a professional health profile',
     'home.ctaTitle': 'Ready to take control of your health?',
     'home.ctaSubtitle': 'Join thousands of users who trust MedAI for fast, reliable medical guidance.',
-'findDoctor.title': 'Find a Doctor',
+    'findDoctor.title': 'Find a Doctor',
     'findDoctor.symptomsLabel': 'Describe your symptoms',
     'findDoctor.searchButton': 'Search Doctors',
     'findDoctor.cityLabel': 'Your city',
@@ -99,11 +99,20 @@ const translations = {
     'chat.placeholder': 'Type your health question...',
     'chat.send': 'Send',
     'chat.history': 'Chat History',
-    'chat.delete': 'Delete Chat',
-    'chat.rename': 'Rename Chat',
     'chat.aiPrefix': 'MedAI',
     'chat.userPrefix': 'You',
     'chat.loginRequired': 'Please log in to save your chat history',
+    'chat.newChat': 'New Chat',
+    'chat.noChats': 'No chats yet',
+    'chat.startConversation': 'Start a new conversation!',
+    'chat.howCanIHelp': 'How can I help you today?',
+    'chat.askAnything': 'Ask me anything about your health concerns, symptoms, or general medical questions.',
+    'chat.deleteConfirm': 'Are you sure you want to delete this chat? This action cannot be undone.',
+    'chat.disclaimer': 'This is not a substitute for professional medical advice. Please consult a healthcare provider for serious concerns.',
+    'chat.rename': 'Rename',
+    'chat.delete': 'Delete',
+    'chat.cancel': 'Cancel',
+    'chat.save': 'Save',
 
     // Unauthenticated Chat
     'unauth.title': 'Quick Chat',
@@ -138,6 +147,19 @@ const translations = {
     'articles.categories.fitness': 'Fitness',
     'articles.categories.mental_health': 'Mental Health',
     'articles.categories.preventive_care': 'Preventive Care',
+
+    // Testimonials
+    'testimonials.sectionTitle': 'What Our Users Say',
+    'testimonials.modalTitle': 'User Testimonials',
+    'testimonials.loadMore': 'Load More',
+    'testimonials.seeMore': 'See More Comments',
+    'testimonials.seeAll': 'See All Feedback',
+    'testimonials.noTestimonials': 'No testimonials available yet.',
+    'testimonials.noTestimonialsYet': 'No testimonials available yet. Be the first to leave your feedback!',
+    'testimonials.anonymous': 'Anonymous User',
+    'testimonials.userRole': 'User',
+    'testimonials.patient': 'Patient',
+    'testimonials.healthcareProfessional': 'Healthcare Professional',
     
     // Profile
     'profile.title': 'Your Profile',
@@ -211,8 +233,6 @@ const translations = {
     'legal.contact.subtitle': 'We are here to help',
     'legal.contact.intro': 'If you have any questions, feedback, or concerns, please contact us:',
     'legal.contact.email': 'Email: support@medai.health',
-    'legal.contact.address': 'Address: (Your organization address)',
-    'legal.contact.hours': 'Hours: Monday – Friday, 9 AM – 6 PM (CET)',
 
     // Feature cards
     'features.aiAnalysis.title': 'AI-Powered Analysis',
@@ -358,11 +378,20 @@ const translations = {
     'chat.placeholder': 'Tapez votre question de santé...',
     'chat.send': 'Envoyer',
     'chat.history': 'Historique des chats',
-    'chat.delete': 'Supprimer le chat',
-    'chat.rename': 'Renommer le chat',
     'chat.aiPrefix': 'MedAI',
     'chat.userPrefix': 'Vous',
     'chat.loginRequired': 'Veuillez vous connecter pour sauvegarder votre historique de chat',
+    'chat.newChat': 'Nouvelle conversation',
+    'chat.noChats': 'Aucune conversation',
+    'chat.startConversation': 'Démarrer une conversation',
+    'chat.howCanIHelp': 'Comment puis-je vous aider aujourd\'hui ?',
+    'chat.askAnything': 'Posez-moi n\'importe quelle question sur votre santé',
+    'chat.deleteConfirm': 'Êtes-vous sûr de vouloir supprimer cette conversation ?',
+    'chat.disclaimer': 'Ceci ne remplace pas un avis médical professionnel. Veuillez consulter un professionnel de santé pour des préoccupations sérieuses.',
+    'chat.rename': 'Renommer',
+    'chat.delete': 'Supprimer',
+    'chat.cancel': 'Annuler',
+    'chat.save': 'Enregistrer',
 
     // Chat Non Authentifié
     'unauth.title': 'Chat Rapide',
@@ -396,6 +425,19 @@ const translations = {
     'articles.categories.mental_health': 'Santé Mentale',
     'articles.categories.preventive_care': 'Soins Préventifs',
     
+    // Témoignages
+    'testimonials.sectionTitle': 'Ce Que Disent Nos Utilisateurs',
+    'testimonials.modalTitle': 'Témoignages des Utilisateurs',
+    'testimonials.loadMore': 'Charger Plus',
+    'testimonials.seeMore': 'Voir Plus de Commentaires',
+    'testimonials.seeAll': 'Voir Tous les Avis',
+    'testimonials.noTestimonials': 'Aucun témoignage disponible pour le moment.',
+    'testimonials.noTestimonialsYet': 'Aucun témoignage disponible pour le moment. Soyez le premier à laisser votre avis !',
+    'testimonials.anonymous': 'Utilisateur Anonyme',
+    'testimonials.userRole': 'Utilisateur',
+    'testimonials.patient': 'Patient',
+    'testimonials.healthcareProfessional': 'Professionnel de Santé',
+
     // Profile
     'profile.title': 'Votre Profil',
     'profile.edit': 'Modifier le Profil',
@@ -468,8 +510,6 @@ const translations = {
     'legal.contact.subtitle': 'Nous sommes là pour vous aider',
     'legal.contact.intro': 'Si vous avez des questions, des commentaires ou des préoccupations, veuillez nous contacter :',
     'legal.contact.email': 'Email : support@medai.health',
-    'legal.contact.address': 'Adresse : (Votre adresse de l\'organisation)',
-    'legal.contact.hours': 'Heures : Lundi - Vendredi, 9h - 18h (CET)',
 
     // Feature cards
     'features.aiAnalysis.title': 'Analyse IA Avancée',
